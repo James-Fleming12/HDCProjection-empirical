@@ -6,7 +6,7 @@ workloads, testing the hypothesis:
 
 > The projection matrix is not a neutral implementation detail. Which
 > similarities a pipeline can express is set by the projection family, its
-> output code, and its interaction with the feature extractor — and the
+> output code, and its interaction with the feature extractor; and the
 > choices that maximize in-distribution accuracy are routinely *not* the
 > choices that maximize robustness, domain-shift accuracy, and novel-class
 > structure.
@@ -131,8 +131,8 @@ or learned, and explain three of the headline results below:
    radius (`shells`) are at chance for *every* sign-linear encoder,
    including trained ones: `learned` reaches 0.40 vs chance 0.21 (6
    classes), and no amount of training fixes it (exp2 shows the same
-   plateau for all D). Kernel approximations are not scale-invariant — the
-   phase `omega.x` scales — and reach 0.85-0.90 on `shells`.
+   plateau for all D). Kernel approximations are not scale-invariant (the
+   phase `omega.x` scales) and reach 0.85-0.90 on `shells`.
 2. **Odd symmetry.** `sign(P(-x)) = -sign(Px)`: every feature is odd, so a
    linear decoder over them is odd. Labels invariant under `x -> -x` (XOR/
    parity) have equal class-conditional feature means and are at chance for
@@ -215,7 +215,7 @@ Cauchy (no finite variance, L1-stable) and very-sparse (1/8 density) are
 the best clean-accuracy models on `heavy_tail` (0.997, 0.995 vs 0.948
 Gaussian). Cauchy is also the *best* heavy-tail model under every
 corruption in exp3 (dropout-0.5: 0.929; flips-0.40: 0.953). The mechanism
-is exactly the 1-stability the construction is chosen for — exp8 measures
+is exactly the 1-stability the construction is chosen for; exp8 measures
 it: Cauchy preserves the L1 order of pairwise distances at rho=0.978
 (L2: 0.318), Gaussian the reverse (L2 0.993, L1 0.920).
 
@@ -251,7 +251,7 @@ disappears together. Sign-linear RPs degrade gracefully because `sign()`
 discards magnitude and shifted points keep their alignment with the
 discriminant directions. Exp8 shows how sharply this depends on bandwidth:
 ID accuracy is flat for bw >= 0.25 (0.995-0.996) while shift OOD moves
-0.354 -> 0.550 -> 0.646 as bw goes 0.25 -> 0.5 -> 1.0 — and the
+0.354 -> 0.550 -> 0.646 as bw goes 0.25 -> 0.5 -> 1.0. The
 validation-tuned SignRFF picks the ID-optimal small bandwidth and inherits
 the worst OOD region (0.458). **ID/validation accuracy is blind to this
 knob.**
@@ -281,7 +281,7 @@ optimizes exactly the known-class directions it was trained on and does not
 preserve the isotropic geometry that keeps unseen classes separable. Its
 OOD-detection AUROC is still 0.972 because max-similarity detection only
 needs the known classes to look different from novel points. Dense random
-RPs — orthogonal, very sparse, Laplace, Gaussian — keep both. This is the
+RPs (orthogonal, very sparse, Laplace, Gaussian) keep both. This is the
 projection analogue of the MicroHD finding that ID validation cannot see
 what generalization needs.
 
@@ -317,7 +317,7 @@ Three mechanisms show up here:
 * **Count-Sketch codes are structurally fragile to model noise**: 5% sign
   flips on its prototypes drop accuracy from 0.959 to 0.086 on `linear`,
   because 98% of its coordinates are constant +1 and its discriminant
-  information lives in only F=64 coordinates — flipping 5% of D hits a
+  information lives in only F=64 coordinates, so flipping 5% of D hits a
   large fraction of the informative ones. The same projection is one of the
   *strongest* under feature noise and dropout (0.790/0.721), because those
   corruptions act on the 64 informative input features while the
@@ -378,7 +378,7 @@ ID accuracy across D (F=64; the dotted line in the figure marks D=F):
   direction in R^F. Exp8 confirms the geometry: SRHT/Hadamard have
   `max off-diagonal |cos| = 1.0` (repeated rows) at D=4096.
 * **Learned projections dominate in the low-D regime** (fine: 0.506 vs
-  0.164 gaussian at D=32; +0.10 at D=128, +0.02 by D=4096) — learning pays
+  0.164 gaussian at D=32; +0.10 at D=128, +0.02 by D=4096). Learning pays
   off exactly where random projections cannot afford enough directions.
 * **Kernel/frequency codes need D**: FPE-1bit is useless below D=128 and
   keeps improving through D=4096; SignRFF on `shells` improves from 0.50 to
@@ -411,7 +411,7 @@ Corruption level at which accuracy falls to 90% of its clean value
   dense RPs on `linear` (0.97 vs 1.36), a second face of the
   bandwidth-limited receptive field.
 * FPE-1bit and count-sketch collapse under tiny flip probabilities
-  (0.004-0.009) — both have extremely low effective coordinate diversity
+  (0.004-0.009): both have extremely low effective coordinate diversity
   (FPE's phases are near-constant at the default bandwidth; count-sketch's
   codes are constant except F coordinates). Their clean accuracy is fine;
   their stored models are not robust.
@@ -434,7 +434,7 @@ For sign-like codes (SignRFF, FPE-3bit) the same holds within 1 pt. The
 finding is the *opposite* of the usual quantization intuition: 2-bit
 scalar codes cost nothing because `sign()`-dominated codes carry their
 information in directions, not magnitudes, while an aggressive **k-means
-codebook (256 codewords for a 4096-dim cloud) destroys accuracy** — the
+codebook (256 codewords for a 4096-dim cloud) destroys accuracy**: the
 codebook is too coarse to represent the class-conditional geometry.
 
 **Projection-matrix PTQ** (Gaussian and SRHT, exp4 `ptq`):
@@ -459,9 +459,9 @@ codebook is too coarse to represent the class-conditional geometry.
 * A 1-bit (sign) projection costs 3-6 pts on heavy-tail but is otherwise
   close; ternary is nearly free.
 * Quantization-aware prototype retraining (2/3/4 bits): +0.8/+0.5/+0.1 pt
-  on fine, +0.1-0.2 elsewhere — real but small, because post-hoc MSE-PTQ is
-  already near-lossless here. QAT matters when the codec is the bottleneck,
-  not when it is free.
+  on fine, +0.1-0.2 elsewhere. The gains are real but small, because
+  post-hoc MSE-PTQ is already near-lossless here. QAT matters when the
+  codec is the bottleneck, not when it is free.
 
 ## Exp5: feature extractors (`results/exp5_extractor.csv`)
 
@@ -492,7 +492,7 @@ conclusions for `+signrff`/`+learned` differ only on `fine`/`heavy_tail`
   a learned projection reaches fine 0.579 vs 0.369 with a random
   projection (+21 pts) and heavy-tail 0.898 vs 0.826.
 * **Weight clustering is nearly free** (4 levels: -1.9 pts fine, +0.7 OOD
-  relative to CE; 8 levels: +0.1/-0.5) — a 4x weight-memory reduction for
+  relative to CE; 8 levels: +0.1/-0.5), a 4x weight-memory reduction for
   ~1 pt.
 * **Co-training through the HDC objective is the only variant that helps
   robustness and unlocks XOR** (exp7: XOR 0.51 vs 0.25 chance for any
@@ -521,7 +521,7 @@ Gaussian RP, D=4096:
 | L2 / standardize / PCA-whiten inputs | 0.722 (all identical) | 0.948 | 0.977 | 0.997 |
 
 * Similarity metric is a 3-5 pt knob at most; cosine is a safe default.
-  **L1/RBF must be applied to L2-normalized vectors** — with raw
+  **L1/RBF must be applied to L2-normalized vectors**; with raw
   accumulated prototypes the ranking is dominated by prototype norm and
   accuracy collapses to chance (0.03-0.04). This is a trap worth stating:
   all four metrics are implemented on normalized vectors in `hd.py`.
@@ -529,8 +529,8 @@ Gaussian RP, D=4096:
   cosine k-means fragments the class-conditional mode that a single
   bundled prototype represents well. 30 balanced Gaussian-ish classes do
   not need mixture prototypes.
-* Preprocessing is a no-op for sign codes (as expected — `sign` sees only
-  the direction), and retraining buys ~1.4 pts on fine.
+* Preprocessing is a no-op for sign codes (as expected, since `sign` sees
+  only the direction), and retraining buys ~1.4 pts on fine.
 * Prototype storage at 2 bits or even 1 sign bit is free for Gaussian RP
   (total classifier memory /16 or /32).
 
@@ -548,7 +548,7 @@ so ID accuracy measures the encoding, not the classifier (D=2048):
 
 * The conjunction matters most: binding adjacent symbols raises accuracy
   from 0.30 to 0.69, and **adding a position code hurts** (0.69 -> 0.60)
-  when the label is position-invariant — the same bigram at different
+  when the label is position-invariant: the same bigram at different
   positions lands in different codes, diluting the prototype. Position
   should be encoded only when order matters.
 * Bipolar `mul` binding and binary `xor` binding are exactly equivalent
@@ -586,7 +586,7 @@ D=1024 (where random RPs still leave room):
   +0.25 over the next-best projection): a ReLU extractor is not an odd
   function, so the symmetry obstruction of pure linear projections does not
   apply. Learned *linear* projections remain at chance even at 120 epochs
-  (0.24) — a direct empirical confirmation of the odd-symmetry limit.
+  (0.24), a direct empirical confirmation of the odd-symmetry limit.
 
 ## Exp8: geometry and theory validation (`results/exp8_*.csv`)
 
@@ -606,7 +606,7 @@ distance error (variance-preserving rescaling) at D=4096:
 
 The sub-Gaussian JL guarantees hold to within a few percent for every
 zero-mean bounded-variance construction. **The low-discrepancy Sobol
-projection is 6x below the random JL rate** — on this metric determinism
+projection is 6x below the random JL rate**: on this metric determinism
 buys accuracy, not costs it. Cauchy's distance estimator is useless for
 L2 (as theory says) and excellent for L1 (next table).
 
@@ -640,7 +640,7 @@ RFF/FPE track the 1/D Monte-Carlo rate; the phasor (bias-free) variant is
 64x more dimensions buys only 2x lower error, which is the price of the
 1-bit code (exp1 still shows SignRFF matching linear RPs on accuracy, so
 the floor matters for kernel fidelity, not for classification).
-Random-landmark Nystrom does not improve with D here — landmark choice,
+Random-landmark Nystrom does not improve with D here: landmark choice,
 not dimension, is its bottleneck.
 
 **(d) Bandwidth is the OOD knob ID cannot see** (shift task, D=2048):
@@ -682,7 +682,7 @@ do not interact.
 | goal | recommendation |
 |---|---|
 | smooth/linear-like data | any zero-mean dense RP; use Rademacher/SRHT 1-bit storage or very-sparse (2.4x fewer ops) for free |
-| fastest projection | Count-Sketch (D ops/query) — but expect ~4 pts lower accuracy when D > F and fragile stored prototypes |
+| fastest projection | Count-Sketch (D ops/query), but expect ~4 pts lower accuracy when D > F and fragile stored prototypes |
 | radial / non-linear structure | RFF, FPE or Nystrom with a **tuned bandwidth**; expect 0.85-0.90 vs 0.20-0.25 for linear RPs |
 | covariate-shift OOD | dense sign-linear RPs (Gaussian/Sobol/orthogonal/Laplace/very sparse); do **not** tune bandwidth on ID accuracy (59-pt OOD swing) |
 | novel-class discovery | dense zero-mean RPs (orthogonal, very sparse, Laplace); avoid learned projections (NMI 0.67 vs 0.96) |

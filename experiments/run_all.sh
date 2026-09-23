@@ -18,7 +18,7 @@ step () {
   if python "$@" > "logs/$name.log" 2>&1; then
     echo "=== $name OK $(date +%T) ($((SECONDS-t0))s)"
   else
-    echo "=== $name FAIL $(date +%T) ($((SECONDS-t0))s) — see logs/$name.log"
+    echo "=== $name FAIL $(date +%T) ($((SECONDS-t0))s): see logs/$name.log"
     tail -n 15 "logs/$name.log"
   fi
 }
